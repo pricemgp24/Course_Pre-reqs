@@ -11,7 +11,6 @@ validate_ip() {
   [[ $ip =~ $valid_regex ]]
 }
 
-# Welcome Message
 echo "Nmap Scanner Tool"
 echo "----------------------------------------"
 echo "This script helps you scan hosts using common Nmap commands."
