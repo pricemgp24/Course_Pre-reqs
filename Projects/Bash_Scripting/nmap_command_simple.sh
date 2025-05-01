@@ -21,6 +21,7 @@ while true; do
   if validate_ip "$target_ip"; then
     break
   else
+    # Invalid IP, prompt again
     echo "Invalid IP. Please enter a valid IPv4 address (e.g., 192.168.1.1)"
   fi
 done
@@ -78,10 +79,13 @@ esac
 
 # If root is required, prompt to use sudo
 if [[ $requires_root == true && $EUID -ne 0 ]]; then
+  # Check if user is root
   read -p "This scan requires root. Run with sudo? (y/n): " use_sudo
   if [[ $use_sudo =~ ^[Yy]$ ]]; then
+    # Run with sudo
     scan_cmd="sudo $scan_cmd"
   else
+    # Exit without sudo
     echo "Cannot run scan without root. Exiting."
     exit 1
   fi

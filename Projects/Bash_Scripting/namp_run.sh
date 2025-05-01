@@ -12,6 +12,7 @@ validate_ip() {
   [[ $ip =~ $valid_regex ]]
 }
 
+# Prompt for IP
 while true; do 
     read -p "Input target IP: " nmap_ip
     if validate_ip "$nmap_ip"; then
@@ -21,6 +22,7 @@ while true; do
     fi
 done
 
+# Safe output file name
 safe_ip=$(echo "$nmap_ip" | tr '.' '_')
 echo ""
 
@@ -69,7 +71,6 @@ read -p "Select a command to run (1–7): " choice
 if [[ "$choice" =~ ^[1-7]$ ]]; then
   selected_cmd="${commands[$choice]}"
   output_file="nmap_${safe_ip}_opt${choice}.txt"
-
   echo ""
   echo "Running: $selected_cmd"
   echo "Saving output to: $output_file"
@@ -77,24 +78,31 @@ if [[ "$choice" =~ ^[1-7]$ ]]; then
 
   # If choice requires root (3 = -O, 4 = -A) and user is not root
   if [[ "$choice" == "3" || "$choice" == "4" ]]; then
+    # Check if user is root
     if [[ $EUID -ne 0 ]]; then
+      # Prompt for sudo
       read -p "This scan requires root. Run with sudo? (y/n): " use_sudo
       if [[ "$use_sudo" =~ ^[Yy]$ ]]; then
+        # Run with sudo
         sudo bash -c "$selected_cmd | tee './$output_file'"
       else
+        # Exit without sudo
         echo "Cannot run OS detection without root. Exiting."
         exit 1
       fi
     else
+      # Run without sudo
       eval "$selected_cmd" | tee "./$output_file"
     fi
   else
+    # Run without sudo
     eval "$selected_cmd" | tee "./$output_file"
   fi
 
   echo ""
   echo "Scan complete. Output saved to: $output_file"
 else
+  # Invalid choice
   echo "Invalid choice. Exiting without running a scan."
 fi
 
