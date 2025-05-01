@@ -18,6 +18,7 @@ Features
 
 Project Structure
 
+<pre>
 pycalc_project/
 ├── pycalc/
 │   ├── __init__.py
@@ -28,6 +29,8 @@ pycalc_project/
 ├── run_pycalc.py
 ├── README.md
 └── requirements.txt
+</pre>
+
 
 
 
