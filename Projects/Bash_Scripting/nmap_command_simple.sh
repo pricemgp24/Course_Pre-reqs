@@ -13,8 +13,6 @@ validate_ip() {
 
 echo "Nmap Scanner Tool"
 echo "----------------------------------------"
-echo "This script helps you scan hosts using common Nmap commands."
-echo "You'll be prompted to choose a scan type and target IP."
 echo ""
 
 # Ask for IP input
