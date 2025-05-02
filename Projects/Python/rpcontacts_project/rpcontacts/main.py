@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # rpcontacts/main.py
 
 """This module provides RP Contacts application."""
@@ -9,6 +8,7 @@ from PyQt5.QtWidgets import QApplication
 
 from .database import createConnection  
 from .views import Window
+
 
 def main():
     """RP Contacts main function."""

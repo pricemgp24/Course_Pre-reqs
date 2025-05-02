@@ -51,7 +51,6 @@ class Window(QMainWindow):
         self.deleteButton.clicked.connect(self.deleteContact)
         self.clearAllButton = QPushButton("Clear All")
         self.clearAllButton.clicked.connect(self.clearContacts)
-
         # Lay out the GUI
         layout = QVBoxLayout()
         layout.addWidget(self.addButton)
@@ -95,6 +94,7 @@ class Window(QMainWindow):
 
         if messageBox == QMessageBox.Ok:
             self.contactsModel.clearContacts()
+
 
 class AddDialog(QDialog):
     """Add Contact dialog."""
