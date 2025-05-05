@@ -1,0 +1,659 @@
+# OpenVPN 2.x HOWTO Guide (One-to-One Markdown)
+
+## Introduction
+
+OpenVPN is a powerful SSL VPN solution enabling secure network communication across OSI Layer 2 or 3. It uses standard SSL/TLS protocols for authentication and encryption, supports X.509 certificates, smart cards, and username/password combinations, and allows detailed access control.
+
+OpenVPN 2.0+ supports multi-client server mode, IPv6, and other enhancements. This HOWTO walks through a complete client/server configuration setup.
+
+---
+
+## Table of Contents
+
+- [OpenVPN 2.x HOWTO Guide (One-to-One Markdown)](#openvpn-2x-howto-guide-one-to-one-markdown)
+  - [Introduction](#introduction)
+  - [Table of Contents](#table-of-contents)
+  - [Quickstart](#quickstart)
+  - [Installation](#installation)
+    - [Linux (RPM)](#linux-rpm)
+    - [Linux (Source)](#linux-source)
+    - [Windows](#windows)
+    - [Mac OS X](#mac-os-x)
+  - [Routed vs Bridged VPN](#routed-vs-bridged-vpn)
+  - [Private Subnet Numbering](#private-subnet-numbering)
+  - [Certificate Authority \& Key Generation](#certificate-authority--key-generation)
+  - [Configuration Files](#configuration-files)
+  - [Starting and Testing VPN](#starting-and-testing-vpn)
+    - [Server](#server)
+    - [Client](#client)
+  - [Automatic Startup](#automatic-startup)
+    - [Linux](#linux)
+    - [Windows](#windows-1)
+  - [Controlling OpenVPN](#controlling-openvpn)
+    - [Linux Signals](#linux-signals)
+    - [Windows Hotkeys](#windows-hotkeys)
+  - [Expanding VPN Scope](#expanding-vpn-scope)
+    - [Server LAN](#server-lan)
+    - [Client LAN (Routing)](#client-lan-routing)
+  - [Pushing DHCP Options](#pushing-dhcp-options)
+  - [Client-Specific Policies](#client-specific-policies)
+  - [Alternative Authentication](#alternative-authentication)
+  - [Dual-Factor Authentication](#dual-factor-authentication)
+  - [Redirecting All Traffic](#redirecting-all-traffic)
+  - [Dynamic IP Server](#dynamic-ip-server)
+  - [HTTP Proxy](#http-proxy)
+  - [Samba over VPN](#samba-over-vpn)
+  - [Load Balancing/Failover](#load-balancingfailover)
+  - [Security Hardening](#security-hardening)
+  - [Certificate Revocation](#certificate-revocation)
+  - [References](#references)
+- [Configuring OpenVPN for Automatic Startup and Advanced Operation](#configuring-openvpn-for-automatic-startup-and-advanced-operation)
+  - [Autostart on System Boot](#autostart-on-system-boot)
+    - [Linux](#linux-1)
+    - [Windows](#windows-2)
+  - [Controlling a Running OpenVPN Process](#controlling-a-running-openvpn-process)
+    - [Linux/Unix](#linuxunix)
+    - [Windows GUI](#windows-gui)
+    - [Windows Command Line](#windows-command-line)
+    - [Windows Service Control](#windows-service-control)
+  - [Live Configuration Adjustments](#live-configuration-adjustments)
+  - [Management Interface](#management-interface)
+    - [Enable in Config](#enable-in-config)
+    - [Connect via Telnet](#connect-via-telnet)
+    - [Commands Available](#commands-available)
+  - [Routing Multiple Machines](#routing-multiple-machines)
+    - [Server-Side Routing (dev tun)](#server-side-routing-dev-tun)
+    - [Server-Side Bridging (dev tap)](#server-side-bridging-dev-tap)
+    - [Client-Side Routing (dev tun)](#client-side-routing-dev-tun)
+      - [Server Config](#server-config)
+      - [File: `ccd/client2`](#file-ccdclient2)
+      - [Optional for Peer Access](#optional-for-peer-access)
+    - [Client-Side Bridging (dev tap)](#client-side-bridging-dev-tap)
+  - [DHCP Option Push (DNS, WINS)](#dhcp-option-push-dns-wins)
+  - [Client-Specific Access Policies](#client-specific-access-policies)
+    - [IP Assignment Map](#ip-assignment-map)
+    - [Server Config](#server-config-1)
+    - [CCD Files](#ccd-files)
+    - [iptables Rules](#iptables-rules)
+  - [Alternative Authentication](#alternative-authentication-1)
+    - [Basic Auth with Username/Password](#basic-auth-with-usernamepassword)
+    - [Using PAM Plugin](#using-pam-plugin)
+    - [For Auth-Only (No Certificates)](#for-auth-only-no-certificates)
+
+---
+
+## Quickstart
+
+For minimal VPN setup:
+
+* Use a static key setup (1 client, 1 server)
+* Avoid PKI complexity
+
+Pros:
+
+* Simple
+
+Cons:
+
+* No scalability or forward secrecy
+
+---
+
+## Installation
+
+### Linux (RPM)
+
+```bash
+rpmbuild -tb openvpn-[version].tar.gz
+rpm -ivh openvpn-[version].rpm
+```
+
+Dependencies: `openssl`, `lzo`, `pam`, plus `-devel` packages if compiling.
+
+### Linux (Source)
+
+```bash
+tar xfz openvpn-[version].tar.gz
+cd openvpn-[dir]
+./configure
+make
+make install
+```
+
+### Windows
+
+* Use installer `.exe` from OpenVPN website
+* Run as Admin or Service
+
+### Mac OS X
+
+Use GUI from Angelo Laub & Dirk Theisen.
+
+---
+
+## Routed vs Bridged VPN
+
+* **Routed (TUN)**: Efficient, simpler, scalable
+* **Bridged (TAP)**: Needed for broadcast/non-IP traffic
+
+Use routing unless bridging is explicitly required.
+
+---
+
+## Private Subnet Numbering
+
+Use RFC1918 ranges:
+
+* `10.0.0.0/8`
+* `172.16.0.0/12`
+* `192.168.0.0/16`
+
+Avoid conflicts by using uncommon ranges like `10.66.77.0/24`.
+
+---
+
+## Certificate Authority & Key Generation
+
+Use **Easy-RSA** tools:
+
+1. Edit `vars`
+2. Initialize PKI:
+
+   ```bash
+   source ./vars
+   ./clean-all
+   ./build-ca
+   ```
+3. Generate Server Key:
+
+   ```bash
+   ./build-key-server server
+   ```
+4. Generate Clients:
+
+   ```bash
+   ./build-key client1
+   ./build-key client2
+   ```
+5. Generate DH Params:
+
+   ```bash
+   ./build-dh
+   ```
+
+Key files are located in the `keys` folder.
+
+---
+
+## Configuration Files
+
+Get samples from `/usr/share/doc/openvpn*/sample-config-files/`
+
+Edit:
+
+* **Server**: `ca`, `cert`, `key`, `dh`, `server`, `dev`, `proto`
+* **Client**: `ca`, `cert`, `key`, `remote`, `dev`, `proto`
+
+---
+
+## Starting and Testing VPN
+
+### Server
+
+```bash
+openvpn --config server.conf
+```
+
+### Client
+
+```bash
+openvpn --config client.ovpn
+```
+
+Test with `ping 10.8.0.1`
+
+---
+
+## Automatic Startup
+
+### Linux
+
+RPM/DEB setups scan `/etc/openvpn/*.conf`
+
+### Windows
+
+Set OpenVPN service to **Automatic** via Services MMC
+
+---
+
+## Controlling OpenVPN
+
+### Linux Signals
+
+* `SIGHUP` – restart
+* `SIGTERM` – stop
+
+Use `--writepid` to log PID
+
+### Windows Hotkeys
+
+* `F1` – soft restart
+* `F4` – exit
+
+---
+
+## Expanding VPN Scope
+
+### Server LAN
+
+Add to server config:
+
+```bash
+push "route 10.66.0.0 255.255.255.0"
+```
+
+Add LAN route to gateway if different than VPN server.
+
+### Client LAN (Routing)
+
+Use `client-config-dir` and `iroute`
+
+Server:
+
+```bash
+client-config-dir ccd
+route 192.168.4.0 255.255.255.0
+```
+
+ccd/client2:
+
+```bash
+iroute 192.168.4.0 255.255.255.0
+```
+
+---
+
+## Pushing DHCP Options
+
+```bash
+push "dhcp-option DNS 10.66.0.4"
+push "dhcp-option WINS 10.66.0.8"
+```
+
+---
+
+## Client-Specific Policies
+
+Use `client-config-dir` and `iptables`:
+
+Example:
+
+```bash
+iptables -A FORWARD -i tun0 -s 10.8.2.0/24 -d 10.66.4.12 -j ACCEPT
+```
+
+---
+
+## Alternative Authentication
+
+Use scripts or plugins:
+
+```bash
+auth-user-pass-verify auth-pam.pl via-file
+plugin /usr/share/openvpn/plugin/lib/openvpn-auth-pam.so login
+```
+
+---
+
+## Dual-Factor Authentication
+
+Use PKCS#11:
+
+```bash
+pkcs11-providers /usr/lib/pkcs11/opensc-pkcs11.so
+pkcs11-id 'serialized-id-string'
+```
+
+---
+
+## Redirecting All Traffic
+
+In server config:
+
+```bash
+push "redirect-gateway def1"
+push "dhcp-option DNS 10.8.0.1"
+```
+
+Use NAT:
+
+```bash
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+```
+
+---
+
+## Dynamic IP Server
+
+Use Dynamic DNS (e.g., `dyndns.org`) + update client `remote` with DNS name.
+
+---
+
+## HTTP Proxy
+
+Client config:
+
+```bash
+proto tcp
+http-proxy 192.168.4.1 1080
+```
+
+Add `basic` or `ntlm` for auth.
+
+---
+
+## Samba over VPN
+
+Server-side `smb.conf`:
+
+```bash
+hosts allow = 10.66.0.0/24 10.8.0.0/24
+```
+
+Client connect:
+
+```bash
+net use z: \\10.66.0.4\sharename /USER:myuser
+```
+
+---
+
+## Load Balancing/Failover
+
+Client config:
+
+```bash
+remote server1.domain.com
+remote server2.domain.com
+remote-random
+resolv-retry 60
+```
+
+---
+
+## Security Hardening
+
+Use:
+
+```bash
+tls-auth ta.key 0
+proto udp
+user nobody
+group nobody
+chroot /etc/openvpn/jail
+cipher AES-256-CBC
+```
+
+Keep `ca.key` offline for added security.
+
+---
+
+## Certificate Revocation
+
+```bash
+./revoke-full client2
+```
+
+Add to server config:
+
+```bash
+crl-verify crl.pem
+```
+
+---
+
+## References
+
+* [OpenVPN](https://openvpn.net/)
+* [Easy-RSA](https://github.com/OpenVPN/easy-rsa)
+* [RFC1918](https://tools.ietf.org/html/rfc1918)
+
+---
+# Configuring OpenVPN for Automatic Startup and Advanced Operation
+
+## Autostart on System Boot
+
+### Linux
+
+* **Installation Method**: Use RPM or DEB package.
+* **Autostart Mechanism**: Installer sets up an `initscript`.
+* **Daemon Scan Path**: `/etc/openvpn/*.conf` files will be detected and started individually.
+
+### Windows
+
+* **Installation Method**: Use the Windows installer.
+* **Service Wrapper**: Installed but not enabled by default.
+* **Enable Autostart**:
+
+  * Go to **Control Panel > Administrative Tools > Services**.
+  * Find **OpenVPN Service**, right-click > **Properties**.
+  * Set **Startup Type** to `Automatic`.
+* **Config Path**: Scans `\Program Files\OpenVPN\config\*.ovpn` for autostart.
+
+## Controlling a Running OpenVPN Process
+
+### Linux/Unix
+
+* Signals accepted:
+
+  * `SIGUSR1`: Conditional restart (no root).
+  * `SIGHUP`: Hard restart.
+  * `SIGUSR2`: Log statistics.
+  * `SIGTERM`, `SIGINT`: Exit.
+* Use `--writepid` to record the process PID.
+
+### Windows GUI
+
+* Refer to **OpenVPN GUI** documentation.
+
+### Windows Command Line
+
+* Right-click `.ovpn` file > **Start OpenVPN**.
+* Available commands:
+
+  * `F1`: Conditional restart
+  * `F2`: Show stats
+  * `F3`: Hard restart
+  * `F4`: Exit
+
+### Windows Service Control
+
+* Only controllable through **Services** or **Management Interface**.
+
+## Live Configuration Adjustments
+
+* **Dynamic Directives**:
+
+  * `client-config-dir`: Changes effective on new connections.
+  * `crl-verify`: CRL file changes applied immediately.
+
+## Management Interface
+
+### Enable in Config
+
+```ini
+management localhost 7505
+```
+
+### Connect via Telnet
+
+```bash
+telnet localhost 7505
+```
+
+### Commands Available
+
+* `help`: List all commands
+* `kill cn`: Disconnect client by common name
+* `status`: Show connected clients
+* `signal s`: Send signal to OpenVPN
+* Others: `log`, `verb`, `state`, `exit`, etc.
+
+## Routing Multiple Machines
+
+### Server-Side Routing (dev tun)
+
+* Example: LAN = `10.66.0.0/24`, VPN pool = `10.8.0.0/24`
+
+```ini
+push "route 10.66.0.0 255.255.255.0"
+```
+
+* Add route to LAN gateway: `10.8.0.0/24` → OpenVPN server
+
+### Server-Side Bridging (dev tap)
+
+* No extra config needed—bridging handles it.
+
+### Client-Side Routing (dev tun)
+
+* Example: Client LAN = `192.168.4.0/24`, Common Name = `client2`
+* Prerequisites:
+
+  * Unique subnets
+  * Unique CN
+
+#### Server Config
+
+```ini
+client-config-dir ccd
+route 192.168.4.0 255.255.255.0
+```
+
+#### File: `ccd/client2`
+
+```ini
+iroute 192.168.4.0 255.255.255.0
+```
+
+#### Optional for Peer Access
+
+```ini
+client-to-client
+push "route 192.168.4.0 255.255.255.0"
+```
+
+* Ensure client and server gateways route appropriately.
+
+### Client-Side Bridging (dev tap)
+
+* Bridge TAP to LAN NIC
+* Set IPs manually or use DHCP from VPN server side
+
+## DHCP Option Push (DNS, WINS)
+
+```ini
+push "dhcp-option DNS 10.66.0.4"
+push "dhcp-option DNS 10.66.0.5"
+push "dhcp-option WINS 10.66.0.8"
+```
+
+## Client-Specific Access Policies
+
+### IP Assignment Map
+
+| Class       | Virtual IP Range | Access                  | Common Names             |
+| ----------- | ---------------- | ----------------------- | ------------------------ |
+| Employees   | 10.8.0.0/24      | 10.66.4.4 (Samba/Email) | \[variable]              |
+| Sysadmins   | 10.8.1.0/24      | 10.66.4.0/24            | sysadmin1                |
+| Contractors | 10.8.2.0/24      | 10.66.4.12              | contractor1, contractor2 |
+
+### Server Config
+
+```ini
+dev tun0
+server 10.8.0.0 255.255.255.0
+route 10.8.1.0 255.255.255.0
+route 10.8.2.0 255.255.255.0
+client-config-dir ccd
+```
+
+### CCD Files
+
+```ini
+# sysadmin1
+ifconfig-push 10.8.1.1 10.8.1.2
+
+# contractor1
+ifconfig-push 10.8.2.1 10.8.2.2
+
+# contractor2
+ifconfig-push 10.8.2.5 10.8.2.6
+```
+
+### iptables Rules
+
+```bash
+# Employees
+iptables -A FORWARD -i tun0 -s 10.8.0.0/24 -d 10.66.4.4 -j ACCEPT
+
+# Sysadmins
+iptables -A FORWARD -i tun0 -s 10.8.1.0/24 -d 10.66.4.0/24 -j ACCEPT
+
+# Contractors
+iptables -A FORWARD -i tun0 -s 10.8.2.0/24 -d 10.66.4.12 -j ACCEPT
+```
+
+## Alternative Authentication
+
+### Basic Auth with Username/Password
+
+```ini
+# On client:
+auth-user-pass
+
+# On server:
+auth-user-pass-verify auth-pam.pl via-file
+```
+
+### Using PAM Plugin
+
+```ini
+plugin /usr/share/openvpn/plugin/lib/openvpn-auth-pam.so login
+```
+
+### For Auth-Only (No Certificates)
+
+```ini
+client-cert-not-required
+username-as-common-name
+```
+
+> NOTE: `ca` still required on the client to validate the server certificate.
+
+---
+
+For additional plugin development, see the OpenVPN plugin README.
+
+About dual-factor authentication
+What is PKCS#11?
+Finding PKCS#11 provider library.
+How to configure a cryptographic token
+How to modify an OpenVPN configuration to make use of cryptographic tokens
+Determine the correct object.
+Using OpenVPN with PKCS#11.
+PKCS#11 implementation considerations.
+OpenSC PKCS#11 provider.
+Difference between PKCS#11 and Microsoft Cryptographic API (CryptoAPI).
+...
+(```
+remote-cert-tls server
+```
+[OpenVPN 2.0 and below] Build your server certificates with the build-key-server script (see the easy-rsa documentation for more info). This will designate the certificate as a server-only certificate by setting nsCertType=server. Now add the following line to your client configuration:
+```
+ns-cert-type server
+```
+This will block clients from connecting to any server which lacks the nsCertType=server designation in its certificate, even if the certificate has been signed by the ca file in the OpenVPN configuration file.
+Use the tls-remotedirective on the client to accept/reject the server connection based on the common name of the server certificate.
+Use a tls-verifyscript or plugin to accept/reject the server connection based on a custom test of the server certificate's embedded X509 subject details.
+Sign server certificates with one CA and client certificates with a different CA. The client configuration ca directive should reference the server-signing CA file, while the server configuration cadirective should reference the client-signing CA file.
