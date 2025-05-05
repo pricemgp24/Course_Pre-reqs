@@ -4,7 +4,7 @@ Here are useful Windows CLI commands and their purposes, distilled from the free
 
 ---
 
-## 🔧 System and Admin Access
+## System and Admin Access
 
 - `powershell start cmd -v runAs` — Run Command Prompt as Administrator
 - `driverquery` — List all installed drivers
@@ -18,7 +18,7 @@ Here are useful Windows CLI commands and their purposes, distilled from the free
 
 ---
 
-## 📁 File and Directory Management
+## File and Directory Management
 
 - `dir` — List directory contents
 - `cd` or `chdir` — Change directory
@@ -34,7 +34,7 @@ Here are useful Windows CLI commands and their purposes, distilled from the free
 
 ---
 
-## 🌐 Network and Internet Tools
+## Network and Internet Tools
 
 - `ping domain.com` — Test network latency and connectivity
 - `ipconfig` — Show IP settings
@@ -44,13 +44,13 @@ Here are useful Windows CLI commands and their purposes, distilled from the free
 
 ---
 
-## 🔒 Security and Encryption
+## Security and Encryption
 
 - `cipher` — Wipe free space and encrypt data
 
 ---
 
-## 📄 File Utilities
+## File Utilities
 
 - `clip` — Copy command output to clipboard (e.g., `dir | clip`)
 - `fc file1 file2` — Compare two files
@@ -60,21 +60,21 @@ Here are useful Windows CLI commands and their purposes, distilled from the free
 
 ---
 
-## ⚙️ Power Management
+##  Power Management
 
 - `powercfg` — Manage power settings
 - `powercfg /energy` — Generate power efficiency report
 
 ---
 
-## 🗓 Date and Time
+## Date and Time
 
 - `date` — Show/change date
 - `time` — Show/change time
 
 ---
 
-## 🌳 Misc
+## Misc
 
 - `tree` — Display directory tree
 - `tasklist` — List running tasks
@@ -87,4 +87,4 @@ Here are useful Windows CLI commands and their purposes, distilled from the free
 
 ---
 
-> ⚠️ Use these commands carefully. Some affect system configuration and may require administrative privileges.
+>  Use these commands carefully. Some affect system configuration and may require administrative privileges.
