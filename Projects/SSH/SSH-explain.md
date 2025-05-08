@@ -1,21 +1,21 @@
-What is SSH (Secure Shell)?
+### What is SSH (Secure Shell)?
 
 This is the start page for the SSH (Secure Shell) protocol, software, and related information. SSH is a software package that enables secure system administration and file transfers over insecure networks. It is used in nearly every data center and in every large enterprise.
 
 This page was created by the inventor of SSH, Tatu Ylonen (twitter: @tjssh). He wrote ssh-1.x and ssh-2.x, and still works on related topics. The open source OpenSSH implementation is based on his free version.
 
-Contents
+#### Contents
 
-The SSH protocol
-Download client software
-List of SSH implementations
-Running & configuring SSH
-Security of SSH and attacks against it
-Automate with SSH keys, but manage them
-History of the SSH protocol
-New call-to-action
+- The SSH protocol
+- Download client software
+- List of SSH implementations
+- Running & configuring SSH
+- Security of SSH and attacks against it
+- Automate with SSH keys, but manage them
+- History of the SSH protocol
+- New call-to-action
 
-The SSH protocol
+#### The SSH protocol
 
 The SSH protocol uses encryption to secure the connection between a client and a server. All user authentication, commands, output, and file transfers are encrypted to protect against attacks in the network. For details of how the SSH protocol works, see the protocol page. To understand the SSH File Transfer Protocol, see the SFTP page.
 
@@ -24,10 +24,10 @@ Download client software
 
 Here you can find links to download various free SSH implementations. We offer various free SSH implementations for download, and provide links to commercial implementations.
 
-Download PuTTY
-Download SSH clients
-New call-to-action
-List of SSH implementations
+- Download PuTTY
+- Download SSH clients
+- New call-to-action
+- List of SSH implementations
 
 We list various SSH implementations here. Feel free to submit additional implementations for this page. For many implementations we offer a review, installation instructions, guidance, and/or how-tos on this site.
 
@@ -43,7 +43,7 @@ Windows SSH alternatives
 PrivX™ Privileged Access Management for multi-cloud
 Running & configuring SSH
 
-This section contains links topics around using, configuring, and administering SSH.
+#### This section contains links topics around using, configuring, and administering SSH.
 
 Command line options
 Tectia SSH manuals
@@ -73,7 +73,7 @@ ssh-copy-id - Provision access on servers
 authorized_keys - Authorized keys file format
 The PrivX On-Demand Access Manager can be used as an alternative for SSH keys, eliminating the need for permanent keys and passwords on servers entirely.
 
-History of the SSH protocol
+#### History of the SSH protocol
 
 The Secure Shell protocol was originally developed by Tatu Ylonen in 1995 in response to a hacking incident in the Finnish university network. A password sniffer had been installed on a server connected directly to the backbone, and when it was discovered, it had thousands of usernames and passwords in its database, including several from Ylonen's company.
 

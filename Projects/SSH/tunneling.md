@@ -1,15 +1,15 @@
-SSH Tunneling
+# SSH Tunneling
 
 This page explains SSH tunneling (also called SSH port forwarding), how it can be used to get into an internal corporate network from the Internet, and how to prevent SSH tunnels at a firewall. SSH tunneling is a powerful tool, but it can also be abused. Controlling tunneling is particularly important when moving services to Amazon AWS or other cloud computing services.
 
-Contents
+### Contents
 
-What is an SSH tunnel?
-Who uses SSH tunneling?
-Benefits of SSH tunneling for enterprises
-SSH tunneling in the corporate risk portfolio
-How to configure an SSH tunnel
-What is an SSH tunnel?
+- What is an SSH tunnel?
+- Who uses SSH tunneling?
+- Benefits of SSH tunneling for enterprises
+- SSH tunneling in the corporate risk portfolio
+- How to configure an SSH tunnel
+- What is an SSH tunnel?
 
 SSH tunneling is a method of transporting arbitrary networking data over an encrypted SSH connection. It can be used to add encryption to legacy applications. It can also be used to implement VPNs (Virtual Private Networks) and access intranet services across firewalls.
 
@@ -20,7 +20,7 @@ The figure presents a simplified overview of SSH tunneling. The secure connectio
 
 The SSH connection is used by the application to connect to the application server. With tunneling enabled, the application contacts to a port on the local host that the SSH client listens on. The SSH client then forwards the application over its encrypted tunnel to the server. The server then connects to the actual application server - usually on the same machine or in the same data center as the SSH server. The application communication is thus secured, without having to modify the application or end user workflows.
 
-Who uses SSH tunneling?
+### Who uses SSH tunneling?
 
 The downside is that any user who is able to log into a server can enable port forwarding. This is widely exploited by internal IT people to log into their home machines or servers in a cloud, forwarding a port from the server back into the enterprise intranet to their work machine or suitable server.
 

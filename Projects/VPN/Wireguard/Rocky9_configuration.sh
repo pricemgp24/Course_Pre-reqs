@@ -6,14 +6,17 @@ sudo dnf install epel-release -y
 
 # Install the WireGuard tools package.
 sudo dnf install wireguard-tools -y
-
+#KALI:
+sudo apt-get install wireguard-tools -y
+#PI:
+sudo apt-get install wireguard-tools -y
 #View the installed WireGuard version on your server.
 sudo wg --version
 
 # Your output should be similar to the one below.
 # wireguard-tools v1.0.20210914 - https://git.zx2c4.com/wireguard-tools/
 
-## Configure WireGuard
+## Configure WireGuard On Wireguard Server
 
 # WireGuard uses the cryptokey routing mechanism to create VPN tunnels on your server by checking public keys linked to specific IP addresses. 
 # WireGuard requires a private key that matches a valid public key to enable VPN tunnel connections on a network interface. Follow these steps to set up a new WireGuard interface and create key pairs to use on your server.
@@ -114,6 +117,11 @@ AllowedIPs = 172.16.0.2/32
 # Start the WireGuard server wg0 interface.
 sudo systemctl start wg-quick@wg0.service
 
+# If service still ends and says you need to run journalctl
+journalctl -xeu wg-quick@wg0.service
+# Install Resolvconf
+sudo apt update
+sudo apt install resolvconf -y
 # Enable the WireGuard wg0 interface to automatically start at boot time.
 sudo systemctl enable wg-quick@wg0.service
 
