@@ -1,0 +1,62 @@
+
+============================
+🧠 Tmux Beginner Cheatsheet
+============================
+
+🔹 STARTING & ATTACHING SESSIONS
+--------------------------------
+tmux                    # Start a new tmux session
+tmux new -s <name>      # Start session with a name
+tmux ls                 # List sessions
+tmux attach -t <name>   # Attach to a named session
+tmux kill-session -t <name> # Kill session
+
+🔹 DETACHING & EXITING
+----------------------
+Ctrl-b d                # Detach from current session
+exit                    # Exit current pane or session
+
+🔹 SPLITTING WINDOWS
+--------------------
+Ctrl-b "                # Split pane horizontally
+Ctrl-b %                # Split pane vertically
+
+🔹 MOVING BETWEEN PANES
+------------------------
+Ctrl-b o                # Cycle through panes
+Ctrl-b ;                # Go to last active pane
+Ctrl-b q                # Show pane numbers briefly
+
+🔹 RESIZING PANES
+-----------------
+Ctrl-b :resize-pane -L 10    # Resize left
+Ctrl-b :resize-pane -R 10    # Resize right
+Ctrl-b :resize-pane -U 5     # Resize up
+Ctrl-b :resize-pane -D 5     # Resize down
+
+🔹 WORKING WITH WINDOWS (TABS)
+------------------------------
+Ctrl-b c                # Create new window
+Ctrl-b ,                # Rename window
+Ctrl-b n / p            # Next / Previous window
+Ctrl-b w                # List all windows
+Ctrl-b &                # Kill current window
+
+🔹 SCROLLING (COPY MODE)
+------------------------
+Ctrl-b [                # Enter scroll (copy) mode
+↑/↓ or PgUp/PgDn        # Scroll
+q or ESC                # Quit copy mode
+
+🔹 SAVING YOUR SESSION SETUP
+----------------------------
+Use 'tmuxinator' or manually restore with scripts for automation.
+
+✅ TIP: Prefix (Ctrl-b) can be changed in ~/.tmux.conf
+set -g prefix C-a       # Change prefix to Ctrl-a (like screen)
+unbind C-b
+bind C-a send-prefix
+
+============================
+🎉 Enjoy terminal mastery!
+============================
