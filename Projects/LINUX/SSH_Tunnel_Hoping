@@ -1,0 +1,25 @@
+Scenario (what you’re dropped into)
+
+External “dropbox”: SSH exposed to the Internet
+
+Host/IP: 192.168.198.62
+
+Port: 2222
+
+Creds: offsec:offsec
+
+Internal SSH server (Neo):
+
+Host/IP: 10.0.0.15 (hostname: Neo)
+
+Creds: t.anderson:HeIsTheOne
+
+DNS/HTTP server (Morpheus):
+
+Host/IP: 10.0.0.10 (hostname: Morpheus)
+
+Backdoor: Morpheus calls Neo every minute and connects outbound to TCP 101 on Neo.
+
+Goal: recover access, start web service, punch through firewall, and grab the final flag via a browser.
+
+Kali prep & initial checks

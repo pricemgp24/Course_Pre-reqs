@@ -1,0 +1,25 @@
+cd /var/tmp
+printf 'testdata' > payload.txt          # exact creds, no trailing newline
+
+2) Upload it as the offsec user to ~/flag3/payload.txt
+
+# replace <FTP_HOST> with the target (often localhost or the exercise host IP)
+ftp -nv <FTP_HOST>
+user offsec offsec
+
+# you may be chrooted to offsec's home already; if not, go there:
+# cd /home/offsec
+
+mkdir flag3                                   # ok if it already exists
+cd flag3
+
+# point your local directory to where the file is
+lcd /var/tmp
+
+# upload
+put payload.txt
+
+# verify it’s there
+ls -l
+bye
+

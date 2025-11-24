@@ -1,0 +1,9 @@
+Quick Guide: nbtstat, net share, and net use (Windows)
+
+Below is a tight, copy-paste-friendly cheat sheet using the same patterns we just used (mapping \\finance.outofthisworld.com\finance etc.). It also calls out the common “gotchas” we hit (admin vs. user token, empty passwords, visibility in Explorer).
+
+nbtstat — NetBIOS over TCP/IP diagnostics
+
+What it’s for: Name resolution + NetBIOS session/status checks. Helpful to see what a host advertises and to sanity-check name resolution before mapping shares.
+
+Common commands:

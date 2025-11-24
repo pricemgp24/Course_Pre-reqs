@@ -1,0 +1,13 @@
+### Connect to host when host is sending connections
+``` 
+socat -d -d -v TCP-LISTEN:101,reuseaddr,fork STDOUT
+```
+
+Check what webserver running 
+# List service scripts in the default location
+ls -l /etc/init.d/
+
+# Find likely web server scripts
+ls /etc/init.d | grep -Ei 'nginx|apache|httpd|lighttpd|caddy|haproxy'
+
+
